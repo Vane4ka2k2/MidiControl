@@ -1,0 +1,39 @@
+name: Build and Release
+
+on:
+  push:
+    tags:
+      - 'v*'
+
+jobs:
+  release:
+    runs-on: windows-latest
+    permissions:
+      contents: write
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Configure CMake
+        run: cmake -B build -DCMAKE_BUILD_TYPE=Release
+
+      - name: Build project
+        run: cmake --build build --config Release
+
+      - name: Package Release
+        shell: powershell
+        run: |
+          New-Item -ItemType Directory -Path staging
+          Copy-Item "build/Release/MidiControl.exe" -Destination "staging/"
+          Copy-Item "config.json" -Destination "staging/"
+          Copy-Item "README.md" -Destination "staging/"
+          Compress-Archive -Path "staging/*" -DestinationPath "MidiControl-${{ github.ref_name }}-win64.zip"
+
+      - name: Create GitHub Release
+        uses: softprops/action-gh-release@v2
+        with:
+          files: MidiControl-${{ github.ref_name }}-win64.zip
+          generate_release_notes: true
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

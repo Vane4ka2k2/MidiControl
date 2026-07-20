@@ -11,16 +11,20 @@
 #include "Utils.h"
 #include <iostream>
 #include <algorithm>
+#include <mutex>
 #include <psapi.h>
 
 AppConfig MidiController::g_Config;
 AppVolumeManager MidiController::g_AppVolume;
-AudioDeviceManager MidiController::g_AudioDevManager;
 
-static bool g_SmartDuckingActive = false;
-static float g_PreDuckingVolume = 0.5f;
-static BYTE g_LastEncoder2Val = 64;
-static BYTE g_LastEncoder3Val = 64;
+namespace {
+    static std::mutex g_StateMutex;
+    static bool g_SmartDuckingActive = false;
+    static float g_PreDuckingVolume = 0.5f;
+    static BYTE g_LastEncoder2Val = 64;
+    static BYTE g_LastEncoder3Val = 64;
+    static bool g_PadState[128] = { false };
+}
 
 bool MidiController::Initialize(const std::string& configPath) {
     ConfigParser::LoadConfig(configPath, g_Config);
@@ -32,17 +36,21 @@ bool MidiController::Initialize(const std::string& configPath) {
     }
 
     targetDeviceIndex = -1;
+    std::wstring searchName = Utf8ToWstring(g_Config.deviceName);
+    std::transform(searchName.begin(), searchName.end(), searchName.begin(), ::tolower);
+
     for (UINT i = 0; i < numDevs; ++i) {
         MIDIINCAPSW caps;
         if (midiInGetDevCapsW(i, &caps, sizeof(caps)) == MMSYSERR_NOERROR) {
             std::wcout << L" [" << i << L"] " << caps.szPname << L"\n";
             std::wstring devName(caps.szPname);
+            std::wstring devNameLower = devName;
+            std::transform(devNameLower.begin(), devNameLower.end(), devNameLower.begin(), ::tolower);
 
             if (targetDeviceIndex == -1 && 
-               (devName.find(L"Minilab") != std::wstring::npos || 
-                devName.find(L"MINILAB") != std::wstring::npos ||
-                devName.find(L"Arturia") != std::wstring::npos ||
-                devName.find(L"ARTURIA") != std::wstring::npos)) {
+               (devNameLower.find(searchName) != std::wstring::npos || 
+                devNameLower.find(L"minilab") != std::wstring::npos ||
+                devNameLower.find(L"arturia") != std::wstring::npos)) {
                 targetDeviceIndex = static_cast<int>(i);
             }
         }
@@ -80,10 +88,9 @@ void MidiController::Stop() {
 void MidiController::ExecutePadAction(const PadConfig& pad) {
     std::wstring label = Utf8ToWstring(pad.label);
 
-    if (pad.action == "cycle_audio_device") {
-        std::wstring newDevName = g_AudioDevManager.CycleOutputDevice();
-        OSDWindow::Show(Utf8ToWstring("Устройство вывода"), -1, newDevName);
-        std::wcout << L"[Пэд] Аудиовыход переключен на: " << newDevName << L"\n";
+    if (pad.action == "master_mute") {
+        MediaController::MasterMute();
+        OSDWindow::Show(Utf8ToWstring("Звук"), -1, Utf8ToWstring("MUTE TOGGLE"));
     } else if (pad.action == "show_desktop") {
         MediaController::ShowDesktop();
         OSDWindow::Show(Utf8ToWstring("Рабочий стол"), -1, Utf8ToWstring("WIN + D"));
@@ -100,6 +107,7 @@ void MidiController::ExecutePadAction(const PadConfig& pad) {
         MediaController::PrevTrack();
         OSDWindow::Show(Utf8ToWstring("Медиаплеер"), -1, Utf8ToWstring("ПРЕДЫДУЩИЙ ТРЕК"));
     } else if (pad.action == "smart_ducking") {
+        std::lock_guard<std::mutex> lock(g_StateMutex);
         if (!g_SmartDuckingActive) {
             g_PreDuckingVolume = g_AppVolume.GetMasterVolume();
             g_AppVolume.SetMasterVolume(0.15f);
@@ -141,6 +149,7 @@ void MidiController::SetFocusedAppVolume(float scalar) {
 }
 
 void MidiController::HandleEncoder2(BYTE ccValue) {
+    std::lock_guard<std::mutex> lock(g_StateMutex);
     if (ccValue > g_LastEncoder2Val) {
         MediaController::SeekForward();
         OSDWindow::Show(Utf8ToWstring("Перемотка"), -1, Utf8ToWstring("ВПЕРЕД ⏩"));
@@ -152,6 +161,7 @@ void MidiController::HandleEncoder2(BYTE ccValue) {
 }
 
 void MidiController::HandleEncoder3(BYTE ccValue) {
+    std::lock_guard<std::mutex> lock(g_StateMutex);
     if (ccValue > g_LastEncoder3Val) {
         MediaController::ZoomIn();
         OSDWindow::Show(Utf8ToWstring("Масштаб"), -1, Utf8ToWstring("УВЕЛИЧИТЬ 🔍+"));
@@ -166,7 +176,7 @@ void CALLBACK MidiController::MidiInProc(HMIDIIN hMidiIn, UINT wMsg, DWORD_PTR d
     if (wMsg == MIM_DATA) {
         BYTE status = LOBYTE(LOWORD(dwParam1));
         BYTE data1  = HIBYTE(LOWORD(dwParam1)); // Номер контроллера (CC) или ноты
-        BYTE data2  = LOBYTE(HIWORD(dwParam1)); // Значение (0-127) или Velocity
+        BYTE data2  = LOBYTE(HIWORD(dwParam1)); // Значение (0-127) или Velocity / Pressure
 
         BYTE messageType = status & 0xF0;
         BYTE channel     = (status & 0x0F) + 1;
@@ -178,37 +188,32 @@ void CALLBACK MidiController::MidiInProc(HMIDIIN hMidiIn, UINT wMsg, DWORD_PTR d
             float scalar  = static_cast<float>(ccValue) / 127.0f;
             int percent   = static_cast<int>(scalar * 100.0f + 0.5f);
 
-            // Encoder 1 (CC 74) -> Громкость активного окна
-            if (ccNumber == 74) {
-                SetFocusedAppVolume(scalar);
-                return;
-            }
-            // Encoder 2 (CC 71) -> Перемотка трека
-            else if (ccNumber == 71) {
-                HandleEncoder2(ccValue);
-                return;
-            }
-            // Encoder 3 (CC 76) -> Масштаб браузера
-            else if (ccNumber == 76) {
-                HandleEncoder3(ccValue);
-                return;
-            }
-
-            // Fader 1 (CC 82 / 14) -> Общая мастер-громкость
-            for (const auto& [id, fader] : g_Config.faders) {
-                if (ccNumber == fader.ccArturia || ccNumber == fader.ccDaw) {
-                    std::wstring label = Utf8ToWstring(fader.label);
-
-                    if (fader.type == "master_volume") {
-                        g_AppVolume.SetMasterVolume(scalar);
-                        OSDWindow::Show(label, percent);
-                        std::cout << "[Громкость] " << fader.label << " -> " << percent << "%\n";
+            // Энкодеры
+            for (const auto& [id, encoder] : g_Config.encoders) {
+                if (ccNumber == encoder.cc) {
+                    if (encoder.action == "focused_app_volume") {
+                        SetFocusedAppVolume(scalar);
+                    } else if (encoder.action == "seek_media") {
+                        HandleEncoder2(ccValue);
+                    } else if (encoder.action == "zoom_browser") {
+                        HandleEncoder3(ccValue);
                     }
                     return;
                 }
             }
 
-            // Проверяем пэды по CC
+            // Фейдеры (Мастер-громкость)
+            for (const auto& [id, fader] : g_Config.faders) {
+                if (ccNumber == fader.ccArturia || ccNumber == fader.ccDaw) {
+                    std::wstring label = Utf8ToWstring(fader.label);
+                    g_AppVolume.SetMasterVolume(scalar);
+                    OSDWindow::Show(label, percent);
+                    std::cout << "[Громкость] " << fader.label << " -> " << percent << "%\n";
+                    return;
+                }
+            }
+
+            // Пэды по CC
             for (const auto& [id, pad] : g_Config.pads) {
                 if (ccNumber == pad.cc && ccValue > 0) {
                     ExecutePadAction(pad);
@@ -220,26 +225,42 @@ void CALLBACK MidiController::MidiInProc(HMIDIIN hMidiIn, UINT wMsg, DWORD_PTR d
                       << " | CC: " << static_cast<int>(ccNumber)
                       << " | Значение: " << static_cast<int>(ccValue) << "\n";
         }
-        // 2. Обработка Note On (0x90) — Пэды
-        else if (messageType == 0x90) {
+        // 2. Обработка Note On (0x90) и Polyphonic Key Pressure / Aftertouch (0xA0) — Пэды
+        else if (messageType == 0x90 || messageType == 0xA0) {
             BYTE noteNumber = data1;
-            BYTE velocity   = data2;
+            BYTE val        = data2;
 
-            if (velocity > 0) { // Нажатие пэда
-                for (const auto& [id, pad] : g_Config.pads) {
-                    if (noteNumber == pad.note || noteNumber == pad.cc || (noteNumber >= 36 && noteNumber <= 43 && (noteNumber - 35) == id)) {
-                        ExecutePadAction(pad);
-                        return;
+            if (val > 0) {
+                bool shouldTrigger = false;
+                {
+                    std::lock_guard<std::mutex> lock(g_StateMutex);
+                    if (!g_PadState[noteNumber]) {
+                        g_PadState[noteNumber] = true;
+                        shouldTrigger = true;
                     }
                 }
 
-                std::cout << "[MIDI Note ON] Канал " << static_cast<int>(channel)
-                          << " | Нота: " << static_cast<int>(noteNumber)
-                          << " | Сила (Velocity): " << static_cast<int>(velocity) << "\n";
+                if (shouldTrigger) {
+                    for (const auto& [id, pad] : g_Config.pads) {
+                        if (noteNumber == pad.note || noteNumber == pad.cc || (noteNumber >= 36 && noteNumber <= 43 && (noteNumber - 35) == id)) {
+                            ExecutePadAction(pad);
+                            return;
+                        }
+                    }
+
+                    std::cout << "[MIDI Pad Triggered] Канал " << static_cast<int>(channel)
+                              << " | Нота: " << static_cast<int>(noteNumber)
+                              << " | Значение: " << static_cast<int>(val) << "\n";
+                }
+            } else {
+                std::lock_guard<std::mutex> lock(g_StateMutex);
+                g_PadState[noteNumber] = false;
             }
         }
-        else if (messageType == 0x80) {
-            // Игнорируем отпускание пэда
+        else if (messageType == 0x80) { // Note Off (0x80)
+            BYTE noteNumber = data1;
+            std::lock_guard<std::mutex> lock(g_StateMutex);
+            g_PadState[noteNumber] = false;
         }
         else {
             std::cout << "[MIDI Event] Тип: 0x" << std::hex << static_cast<int>(messageType)

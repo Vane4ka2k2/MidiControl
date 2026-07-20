@@ -35,15 +35,26 @@ struct PadConfig {
 };
 
 /**
+ * @struct EncoderConfig
+ * @brief Структура конфигурации отдельного энкодера.
+ */
+struct EncoderConfig {
+    BYTE cc = 0;        ///< Номер CC контроллера
+    std::string action; ///< Идентификатор действия ("focused_app_volume", "seek_media", "zoom_browser")
+    std::string label;  ///< Текстовое описание действия
+};
+
+/**
  * @struct AppConfig
  * @brief Главная структура настроек приложения.
  */
 struct AppConfig {
-    std::string deviceName = "Minilab"; ///< Подстрока поиска MIDI-устройства
-    bool showOsd = true;               ///< Включить выплывающее OSD-уведомление
-    int osdDurationMs = 1500;           ///< Длительность показа OSD плашки в мс
-    std::map<int, FaderConfig> faders;  ///< Карта конфигураций фейдеров (Ключ 1..4)
-    std::map<int, PadConfig> pads;      ///< Карта конфигураций пэдов (Ключ 1..8)
+    std::string deviceName = "Minilab";    ///< Подстрока поиска MIDI-устройства
+    bool showOsd = true;                  ///< Включить выплывающее OSD-уведомление
+    int osdDurationMs = 1500;              ///< Длительность показа OSD плашки в мс
+    std::map<int, FaderConfig> faders;     ///< Карта конфигураций фейдеров (Ключ 1..4)
+    std::map<int, EncoderConfig> encoders; ///< Карта конфигураций энкодеров (Ключ 1..3)
+    std::map<int, PadConfig> pads;         ///< Карта конфигураций пэдов (Ключ 1..8)
 };
 
 /**

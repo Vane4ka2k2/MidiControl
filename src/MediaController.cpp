@@ -1,47 +1,70 @@
 /**
  * @file MediaController.cpp
- * @brief Реализация вызова мультимедийных клавиш, сочетаний Win32 и протокола Telegram.
+ * @brief Реализация вызова мультимедийных клавиш, сочетаний Win32 и протокола Telegram с использованием SendInput.
  * @author Vane4ka2k2
  * @date 2026
  */
 
 #include "MediaController.h"
 #include <shellapi.h>
+#include <vector>
+
+namespace {
+    static void SendKeyPress(WORD vk) {
+        INPUT inputs[2] = {};
+        inputs[0].type = INPUT_KEYBOARD;
+        inputs[0].ki.wVk = vk;
+
+        inputs[1].type = INPUT_KEYBOARD;
+        inputs[1].ki.wVk = vk;
+        inputs[1].ki.dwFlags = KEYEVENTF_KEYUP;
+
+        SendInput(2, inputs, sizeof(INPUT));
+    }
+
+    static void SendKeyCombo(const std::vector<WORD>& vks) {
+        std::vector<INPUT> inputs;
+        inputs.reserve(vks.size() * 2);
+
+        for (WORD vk : vks) {
+            INPUT in = {};
+            in.type = INPUT_KEYBOARD;
+            in.ki.wVk = vk;
+            inputs.push_back(in);
+        }
+        for (auto it = vks.rbegin(); it != vks.rend(); ++it) {
+            INPUT in = {};
+            in.type = INPUT_KEYBOARD;
+            in.ki.wVk = *it;
+            in.ki.dwFlags = KEYEVENTF_KEYUP;
+            inputs.push_back(in);
+        }
+        SendInput(static_cast<UINT>(inputs.size()), inputs.data(), sizeof(INPUT));
+    }
+}
 
 void MediaController::PlayPause() {
-    keybd_event(VK_MEDIA_PLAY_PAUSE, 0, 0, 0);
-    keybd_event(VK_MEDIA_PLAY_PAUSE, 0, KEYEVENTF_KEYUP, 0);
+    SendKeyPress(VK_MEDIA_PLAY_PAUSE);
 }
 
 void MediaController::NextTrack() {
-    keybd_event(VK_MEDIA_NEXT_TRACK, 0, 0, 0);
-    keybd_event(VK_MEDIA_NEXT_TRACK, 0, KEYEVENTF_KEYUP, 0);
+    SendKeyPress(VK_MEDIA_NEXT_TRACK);
 }
 
 void MediaController::PrevTrack() {
-    keybd_event(VK_MEDIA_PREV_TRACK, 0, 0, 0);
-    keybd_event(VK_MEDIA_PREV_TRACK, 0, KEYEVENTF_KEYUP, 0);
+    SendKeyPress(VK_MEDIA_PREV_TRACK);
 }
 
 void MediaController::MasterMute() {
-    keybd_event(VK_VOLUME_MUTE, 0, 0, 0);
-    keybd_event(VK_VOLUME_MUTE, 0, KEYEVENTF_KEYUP, 0);
+    SendKeyPress(VK_VOLUME_MUTE);
 }
 
 void MediaController::SnippingTool() {
-    keybd_event(VK_LWIN, 0, 0, 0);
-    keybd_event(VK_SHIFT, 0, 0, 0);
-    keybd_event('S', 0, 0, 0);
-    keybd_event('S', 0, KEYEVENTF_KEYUP, 0);
-    keybd_event(VK_SHIFT, 0, KEYEVENTF_KEYUP, 0);
-    keybd_event(VK_LWIN, 0, KEYEVENTF_KEYUP, 0);
+    SendKeyCombo({ VK_LWIN, VK_SHIFT, 'S' });
 }
 
 void MediaController::ShowDesktop() {
-    keybd_event(VK_LWIN, 0, 0, 0);
-    keybd_event('D', 0, 0, 0);
-    keybd_event('D', 0, KEYEVENTF_KEYUP, 0);
-    keybd_event(VK_LWIN, 0, KEYEVENTF_KEYUP, 0);
+    SendKeyCombo({ VK_LWIN, 'D' });
 }
 
 void MediaController::LaunchTelegram() {
@@ -49,25 +72,17 @@ void MediaController::LaunchTelegram() {
 }
 
 void MediaController::SeekForward() {
-    keybd_event(VK_RIGHT, 0, 0, 0);
-    keybd_event(VK_RIGHT, 0, KEYEVENTF_KEYUP, 0);
+    SendKeyPress(VK_RIGHT);
 }
 
 void MediaController::SeekBackward() {
-    keybd_event(VK_LEFT, 0, 0, 0);
-    keybd_event(VK_LEFT, 0, KEYEVENTF_KEYUP, 0);
+    SendKeyPress(VK_LEFT);
 }
 
 void MediaController::ZoomIn() {
-    keybd_event(VK_CONTROL, 0, 0, 0);
-    keybd_event(VK_OEM_PLUS, 0, 0, 0);
-    keybd_event(VK_OEM_PLUS, 0, KEYEVENTF_KEYUP, 0);
-    keybd_event(VK_CONTROL, 0, KEYEVENTF_KEYUP, 0);
+    SendKeyCombo({ VK_CONTROL, VK_OEM_PLUS });
 }
 
 void MediaController::ZoomOut() {
-    keybd_event(VK_CONTROL, 0, 0, 0);
-    keybd_event(VK_OEM_MINUS, 0, 0, 0);
-    keybd_event(VK_OEM_MINUS, 0, KEYEVENTF_KEYUP, 0);
-    keybd_event(VK_CONTROL, 0, KEYEVENTF_KEYUP, 0);
+    SendKeyCombo({ VK_CONTROL, VK_OEM_MINUS });
 }

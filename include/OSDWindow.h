@@ -7,7 +7,10 @@
 
 #pragma once
 #include <string>
+#include <mutex>
 #include <windows.h>
+
+#define WM_OSD_SHOW (WM_USER + 101)
 
 /**
  * @class OSDWindow
@@ -16,6 +19,7 @@
 class OSDWindow {
 private:
     static HWND hwndOSD;                  ///< Дескриптор окна OSD
+    static std::mutex osdMutex;           ///< Мьютекс защиты доступа к текстовым данным OSD
     static std::wstring currentTitle;      ///< Отображаемый заголовок
     static std::wstring currentStatusText; ///< Отображаемый текстовый статус
     static int currentPercent;            ///< Отображаемый процент (0..100) или -1
@@ -28,7 +32,7 @@ public:
     static void Initialize(HINSTANCE hInstance);
 
     /**
-     * @brief Отобразить плашку OSD на экране.
+     * @brief Отобразить плашку OSD на экране (потокобезопасно).
      * @param title Заголовок действия или имя фейдера.
      * @param percent Процент прогресс-бара (0..100) либо -1 если отображается статус.
      * @param statusText Дополнительная текстовая строка статуса.

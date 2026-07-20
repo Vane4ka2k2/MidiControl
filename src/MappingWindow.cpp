@@ -1,13 +1,22 @@
 /**
  * @file MappingWindow.cpp
- * @brief Реализация окна графической карты функций пэдов и энкодеров.
+ * @brief Реализация окна графической карты функций пэдов, энкодеров и фейдеров с динамической отрисовкой.
  * @author Vane4ka2k2
  * @date 2026
  */
 
 #include "MappingWindow.h"
+#include "MidiController.h"
+#include "Utils.h"
+#include <string>
 
 HWND MappingWindow::hwndMapping = NULL;
+
+namespace {
+    static void DrawLine(HDC hdc, int x, int y, const std::wstring& str) {
+        TextOutW(hdc, x, y, str.c_str(), static_cast<int>(str.length()));
+    }
+}
 
 void MappingWindow::Initialize(HINSTANCE hInstance) {
     WNDCLASSEXW wc = { sizeof(WNDCLASSEXW) };
@@ -21,15 +30,15 @@ void MappingWindow::Initialize(HINSTANCE hInstance) {
 
     int screenW = GetSystemMetrics(SM_CXSCREEN);
     int screenH = GetSystemMetrics(SM_CYSCREEN);
-    int width = 570;
-    int height = 480;
+    int width = 640;
+    int height = 560;
     int posX = (screenW - width) / 2;
     int posY = (screenH - height) / 2;
 
     hwndMapping = CreateWindowExW(
         0,
         L"MidiControlMapping",
-        L"MidiControl — Карта функций Arturia Minilab 3",
+        L"MidiControl — Карта функций устройств",
         WS_OVERLAPPEDWINDOW & ~WS_MAXIMIZEBOX & ~WS_THICKFRAME,
         posX, posY, width, height,
         NULL, NULL, hInstance, NULL
@@ -40,6 +49,7 @@ void MappingWindow::Show() {
     if (!hwndMapping) return;
     ShowWindow(hwndMapping, SW_SHOW);
     SetForegroundWindow(hwndMapping);
+    InvalidateRect(hwndMapping, NULL, TRUE);
 }
 
 LRESULT CALLBACK MappingWindow::WndProc(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam) {
@@ -62,50 +72,71 @@ LRESULT CALLBACK MappingWindow::WndProc(HWND hwnd, UINT msg, WPARAM wParam, LPAR
         SetBkMode(hdc, TRANSPARENT);
 
         HFONT fontHeader = CreateFontW(22, 0, 0, 0, FW_BOLD, FALSE, FALSE, FALSE, DEFAULT_CHARSET, OUT_DEFAULT_PRECIS, CLIP_DEFAULT_PRECIS, CLEARTYPE_QUALITY, DEFAULT_PITCH, L"Segoe UI");
-        SelectObject(hdc, fontHeader);
+        HGDIOBJ hOldFont = SelectObject(hdc, fontHeader);
         SetTextColor(hdc, RGB(0, 160, 255));
-        TextOutW(hdc, 24, 20, L"Карта функций Arturia Minilab 3", 31);
-        DeleteObject(fontHeader);
+        
+        std::wstring titleText = Utf8ToWstring("Карта функций MIDI-контроллера (") + Utf8ToWstring(MidiController::g_Config.deviceName) + L")";
+        DrawLine(hdc, 24, 16, titleText);
 
         HFONT fontSection = CreateFontW(17, 0, 0, 0, FW_BOLD, FALSE, FALSE, FALSE, DEFAULT_CHARSET, OUT_DEFAULT_PRECIS, CLIP_DEFAULT_PRECIS, CLEARTYPE_QUALITY, DEFAULT_PITCH, L"Segoe UI");
         HFONT fontText = CreateFontW(15, 0, 0, 0, FW_NORMAL, FALSE, FALSE, FALSE, DEFAULT_CHARSET, OUT_DEFAULT_PRECIS, CLIP_DEFAULT_PRECIS, CLEARTYPE_QUALITY, DEFAULT_PITCH, L"Segoe UI");
 
+        int currentY = 52;
+
         // Секция 1: Фейдеры
         SelectObject(hdc, fontSection);
         SetTextColor(hdc, RGB(240, 200, 80));
-        TextOutW(hdc, 24, 60, L"ФЕЙДЕРЫ (FADERS):", 17);
+        DrawLine(hdc, 24, currentY, L"ФЕЙДЕРЫ (FADERS):");
+        currentY += 24;
 
         SelectObject(hdc, fontText);
         SetTextColor(hdc, RGB(220, 220, 225));
-        TextOutW(hdc, 36, 88,  L"• Fader 1 (CC 82 / 14) — Общая мастер-громкость Windows", 54);
 
-        // Секция 2: Пэды
-        SelectObject(hdc, fontSection);
-        SetTextColor(hdc, RGB(0, 210, 140));
-        TextOutW(hdc, 24, 124, L"ПЭДЫ (PADS 1–8):", 16);
+        for (const auto& [id, fader] : MidiController::g_Config.faders) {
+            std::wstring line = L"• Fader " + std::to_wstring(id) + L" (CC " + std::to_wstring(fader.ccArturia) +
+                L" / " + std::to_wstring(fader.ccDaw) + L") — " + Utf8ToWstring(fader.label);
+            DrawLine(hdc, 36, currentY, line);
+            currentY += 20;
+        }
 
-        SelectObject(hdc, fontText);
-        SetTextColor(hdc, RGB(220, 220, 225));
-        TextOutW(hdc, 36, 152, L"• Pad 1 (Нота 36 / CC 102) — Переключение вывода (Наушники ↔ Динамики)", 70);
-        TextOutW(hdc, 36, 174, L"• Pad 2 (Нота 37 / CC 103) — Рабочий стол / Свернуть окна (Win + D)", 66);
-        TextOutW(hdc, 36, 196, L"• Pad 3 (Нота 38 / CC 104) — Быстрый запуск Telegram", 52);
-        TextOutW(hdc, 36, 218, L"• Pad 4 (Нота 39 / CC 105) — Воспроизведение / Пауза (Play/Pause)", 64);
-        TextOutW(hdc, 36, 240, L"• Pad 5 (Нота 40 / CC 106) — Следующий трек", 43);
-        TextOutW(hdc, 36, 262, L"• Pad 6 (Нота 41 / CC 107) — Предыдущий трек", 44);
-        TextOutW(hdc, 36, 284, L"• Pad 7 (Нота 42 / CC 108) — Приглушение звука (Smart Ducking 15%)", 66);
-        TextOutW(hdc, 36, 306, L"• Pad 8 (Нота 43 / CC 109) — Скриншот области экрана (Win+Shift+S)", 66);
+        currentY += 10;
 
-        // Секция 3: Энкодеры
+        // Секция 2: Энкодеры
         SelectObject(hdc, fontSection);
         SetTextColor(hdc, RGB(180, 140, 255));
-        TextOutW(hdc, 24, 342, L"ЭНКОДЕРЫ (ENCODERS):", 19);
+        DrawLine(hdc, 24, currentY, L"ЭНКОДЕРЫ (ENCODERS):");
+        currentY += 24;
 
         SelectObject(hdc, fontText);
         SetTextColor(hdc, RGB(220, 220, 225));
-        TextOutW(hdc, 36, 370, L"• Encoder 1 (CC 74) — Громкость активного фокусного окна", 56);
-        TextOutW(hdc, 36, 392, L"• Encoder 2 (CC 71) — Перемотка видео / трека (Вперед / Назад)", 61);
-        TextOutW(hdc, 36, 414, L"• Encoder 3 (CC 76) — Масштабирование браузера (Zoom In / Out)", 62);
 
+        for (const auto& [id, encoder] : MidiController::g_Config.encoders) {
+            std::wstring line = L"• Encoder " + std::to_wstring(id) + L" (CC " + std::to_wstring(encoder.cc) +
+                L") — " + Utf8ToWstring(encoder.label);
+            DrawLine(hdc, 36, currentY, line);
+            currentY += 20;
+        }
+
+        currentY += 10;
+
+        // Секция 3: Пэды
+        SelectObject(hdc, fontSection);
+        SetTextColor(hdc, RGB(0, 210, 140));
+        DrawLine(hdc, 24, currentY, L"ПЭДЫ (PADS):");
+        currentY += 24;
+
+        SelectObject(hdc, fontText);
+        SetTextColor(hdc, RGB(220, 220, 225));
+
+        for (const auto& [id, pad] : MidiController::g_Config.pads) {
+            std::wstring line = L"• Pad " + std::to_wstring(id) + L" (Нота " + std::to_wstring(pad.note) +
+                L" / CC " + std::to_wstring(pad.cc) + L") — " + Utf8ToWstring(pad.label);
+            DrawLine(hdc, 36, currentY, line);
+            currentY += 20;
+        }
+
+        SelectObject(hdc, hOldFont);
+        DeleteObject(fontHeader);
         DeleteObject(fontSection);
         DeleteObject(fontText);
         EndPaint(hwnd, &ps);

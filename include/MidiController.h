@@ -11,7 +11,6 @@
 #include <string>
 #include "ConfigManager.h"
 #include "AppVolumeManager.h"
-#include "AudioDeviceManager.h"
 
 /**
  * @class MidiController
@@ -23,9 +22,8 @@ private:
     int targetDeviceIndex = -1;     ///< Индекс обнаруженного MIDI-устройства Arturia Minilab
 
 public:
-    static AppConfig g_Config;                    ///< Глобальный объект конфигурации
-    static AppVolumeManager g_AppVolume;          ///< Глобальный объект управления громкостью WASAPI
-    static AudioDeviceManager g_AudioDevManager;  ///< Глобальный объект переключателя аудиовыходов
+    static AppConfig g_Config;           ///< Глобальный объект конфигурации
+    static AppVolumeManager g_AppVolume; ///< Глобальный объект управления громкостью WASAPI
 
     /**
      * @brief Инициализация и автопоиск устройства Arturia Minilab.

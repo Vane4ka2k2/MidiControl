@@ -16,7 +16,7 @@
     "encoder_3": { "cc": 76, "action": "zoom_browser", "label": "Масштаб страницы" }
   },
   "pads": {
-    "pad_1": { "cc": 102, "note": 36, "action": "cycle_audio_device", "label": "Устройство вывода" },
+    "pad_1": { "cc": 102, "note": 36, "action": "master_mute", "label": "Отключить звук" },
     "pad_2": { "cc": 103, "note": 37, "action": "show_desktop", "label": "Рабочий стол (Win+D)" },
     "pad_3": { "cc": 104, "note": 38, "action": "launch_telegram", "label": "Запуск Telegram" },
     "pad_4": { "cc": 105, "note": 39, "action": "media_play_pause", "label": "Пауза / Воспроизведение" },

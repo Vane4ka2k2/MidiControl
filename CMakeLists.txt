@@ -12,8 +12,17 @@ endif()
 # Директория с заголовочными файлами
 include_directories(include)
 
-# Все исходные файлы проекта из папки src/
-file(GLOB SOURCES "src/*.cpp")
+set(SOURCES
+    src/main.cpp
+    src/AppVolumeManager.cpp
+    src/ConfigManager.cpp
+    src/MappingWindow.cpp
+    src/MediaController.cpp
+    src/MidiController.cpp
+    src/OSDWindow.cpp
+    src/TrayManager.cpp
+    src/Utils.cpp
+)
 
 add_executable(MidiControl ${SOURCES})
 

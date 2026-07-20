@@ -1,0 +1,33 @@
+# Doxygen Configuration File for MidiControl Project
+
+DOXYFILE_ENCODING      = UTF-8
+PROJECT_NAME           = "MidiControl"
+PROJECT_NUMBER         = "1.0.0"
+PROJECT_BRIEF          = "Управление Windows через MIDI-клавиатуру Arturia Minilab 3"
+OUTPUT_DIRECTORY       = docs
+OUTPUT_LANGUAGE        = Russian
+
+# Input directories and settings
+INPUT                  = include src README.md
+RECURSIVE              = YES
+FILE_PATTERNS          = *.h *.cpp *.md
+USE_MDFILE_AS_MAINPAGE = README.md
+
+# Extraction settings
+EXTRACT_ALL            = YES
+EXTRACT_PRIVATE        = YES
+EXTRACT_STATIC         = YES
+CASE_SENSE_NAMES       = NO
+
+# Output generation
+GENERATE_HTML          = YES
+HTML_OUTPUT            = html
+HTML_FILE_EXTENSION    = .html
+GENERATE_LATEX         = NO
+
+# Source browsing & formatting
+SOURCE_BROWSER         = YES
+INLINE_SOURCES         = NO
+STRIP_CODE_COMMENTS    = NO
+REFERENCED_BY_RELATION = YES
+REFERENCES_RELATION    = YES

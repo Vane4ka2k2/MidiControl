@@ -5,6 +5,7 @@
 ![C++17](https://img.shields.io/badge/C%2B%2B-17-blue)
 ![Platform](https://img.shields.io/badge/Platform-Windows-0078D6)
 ![Build](https://img.shields.io/badge/Build-MSVC%20%2F%20CMake-brightgreen)
+![Documentation](https://img.shields.io/badge/Docs-Doxygen-blueviolet)
 
 ---
 
@@ -43,6 +44,18 @@
 
 ---
 
+## 📚 Документация Doxygen
+
+Все заголовочные и исходные файлы проекта полностью документированы по стандарту **Doxygen**.
+
+Для локальной генерации веб-сайта документации запустите:
+```cmd
+doxygen Doxyfile
+```
+Сгенерированная документация появится в папке `docs/html/index.html`.
+
+---
+
 ## 🛠 Сборка и запуск
 
 ### Требования:
@@ -66,6 +79,7 @@ build.bat
 .
 ├── CMakeLists.txt              # Скрипт сборки CMake
 ├── config.json                 # Настройки параметров и привязок
+├── Doxyfile                    # Файл конфигурации Doxygen
 ├── build.bat                   # 1-клик сборка MSVC
 ├── include/
 │   ├── Utils.h                 # Утилиты конвертации кодировок UTF-8

@@ -2,6 +2,8 @@
 build/
 bin/
 out/
+docs/html/
+docs/latex/
 
 # MSVC / Visual Studio generated files
 *.user

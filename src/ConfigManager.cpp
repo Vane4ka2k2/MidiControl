@@ -1,3 +1,10 @@
+/**
+ * @file ConfigManager.cpp
+ * @brief Реализация парсера файла конфигурации config.json.
+ * @author Vane4ka2k2
+ * @date 2026
+ */
+
 #include "ConfigManager.h"
 #include <fstream>
 #include <sstream>

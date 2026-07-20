@@ -1,3 +1,10 @@
+/**
+ * @file AudioDeviceManager.cpp
+ * @brief Реализация переключателя устройств вывода звука по умолчанию с помощью COM IPolicyConfig.
+ * @author Vane4ka2k2
+ * @date 2026
+ */
+
 #include "AudioDeviceManager.h"
 #include <functiondiscoverykeys_devpkey.h>
 #include <iostream>

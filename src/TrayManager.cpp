@@ -1,3 +1,10 @@
+/**
+ * @file TrayManager.cpp
+ * @brief Реализация иконки системного трея Windows и контекстного меню управления.
+ * @author Vane4ka2k2
+ * @date 2026
+ */
+
 #include "TrayManager.h"
 #include "MappingWindow.h"
 #include "Utils.h"

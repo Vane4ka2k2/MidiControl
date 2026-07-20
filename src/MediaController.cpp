@@ -1,3 +1,10 @@
+/**
+ * @file MediaController.cpp
+ * @brief Реализация вызова мультимедийных клавиш, сочетаний Win32 и протокола Telegram.
+ * @author Vane4ka2k2
+ * @date 2026
+ */
+
 #include "MediaController.h"
 #include <shellapi.h>
 

@@ -1,3 +1,10 @@
+/**
+ * @file main.cpp
+ * @brief Точка входа в приложение MidiControl и главный цикл обработки сообщений Windows.
+ * @author Vane4ka2k2
+ * @date 2026
+ */
+
 #include <iostream>
 #include <windows.h>
 #include "OSDWindow.h"

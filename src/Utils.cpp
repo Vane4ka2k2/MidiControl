@@ -1,3 +1,10 @@
+/**
+ * @file Utils.cpp
+ * @brief Реализация служебных утилит конвертации строк UTF-8 в UTF-16 (std::wstring).
+ * @author Vane4ka2k2
+ * @date 2026
+ */
+
 #include "Utils.h"
 
 std::wstring Utf8ToWstring(const std::string& str) {

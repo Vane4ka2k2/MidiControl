@@ -1,3 +1,10 @@
+/**
+ * @file MidiController.cpp
+ * @brief Реализация приёма MIDI-сигналов (winmm), маппинга органов управления и диспетчеризации действий.
+ * @author Vane4ka2k2
+ * @date 2026
+ */
+
 #include "MidiController.h"
 #include "MediaController.h"
 #include "OSDWindow.h"

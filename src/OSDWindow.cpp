@@ -1,3 +1,10 @@
+/**
+ * @file OSDWindow.cpp
+ * @brief Реализация выплывающего OSD-индикатора с анимированным таймером скрыть.
+ * @author Vane4ka2k2
+ * @date 2026
+ */
+
 #include "OSDWindow.h"
 #include "MidiController.h"
 

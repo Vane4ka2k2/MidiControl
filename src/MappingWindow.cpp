@@ -1,3 +1,10 @@
+/**
+ * @file MappingWindow.cpp
+ * @brief Реализация окна графической карты функций пэдов и энкодеров.
+ * @author Vane4ka2k2
+ * @date 2026
+ */
+
 #include "MappingWindow.h"
 
 HWND MappingWindow::hwndMapping = NULL;

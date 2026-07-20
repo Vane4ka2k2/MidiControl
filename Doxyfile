@@ -8,7 +8,7 @@ OUTPUT_DIRECTORY       = docs
 OUTPUT_LANGUAGE        = Russian
 
 # Input directories and settings
-INPUT                  = include src README.md
+INPUT                  = include src docs README.md
 RECURSIVE              = YES
 FILE_PATTERNS          = *.h *.cpp *.md
 USE_MDFILE_AS_MAINPAGE = README.md

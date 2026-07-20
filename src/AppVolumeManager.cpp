@@ -1,3 +1,10 @@
+/**
+ * @file AppVolumeManager.cpp
+ * @brief Реализация модуля управления мастер-громкостью и громкостью приложений через WASAPI.
+ * @author Vane4ka2k2
+ * @date 2026
+ */
+
 #include "AppVolumeManager.h"
 #include <algorithm>
 #include <psapi.h>

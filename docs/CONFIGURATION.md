@@ -12,7 +12,7 @@
 {
   "device_name": "Minilab",
   "show_osd": true,
-  "osd_duration_ms": 1500,
+  "osd_duration_ms": 1000,
   "faders": {
     "fader_1": {
       "cc_arturia": 82,
@@ -22,18 +22,17 @@
     }
   },
   "encoders": {
-    "encoder_1": { "cc": 74, "action": "focused_app_volume", "label": "Активное окно" },
-    "encoder_2": { "cc": 71, "action": "seek_media", "label": "Перемотка трека" },
-    "encoder_3": { "cc": 76, "action": "zoom_browser", "label": "Масштаб страницы" }
+    "encoder_1": { "cc": 74, "action": "seek_media", "label": "Перемотка трека" },
+    "encoder_2": { "cc": 71, "action": "zoom_browser", "label": "Масштаб страницы" }
   },
   "pads": {
-    "pad_1": { "cc": 102, "note": 36, "action": "cycle_audio_device", "label": "Устройство вывода" },
-    "pad_2": { "cc": 103, "note": 37, "action": "show_desktop", "label": "Рабочий стол (Win+D)" },
-    "pad_3": { "cc": 104, "note": 38, "action": "launch_telegram", "label": "Запуск Telegram" },
+    "pad_1": { "cc": 102, "note": 36, "action": "master_mute", "label": "Отключить звук" },
+    "pad_2": { "cc": 103, "note": 37, "action": "smart_ducking", "label": "Приглушение" },
+    "pad_3": { "cc": 104, "note": 38, "action": "media_prev", "label": "Предыдущий трек" },
     "pad_4": { "cc": 105, "note": 39, "action": "media_play_pause", "label": "Пауза / Воспроизведение" },
     "pad_5": { "cc": 106, "note": 40, "action": "media_next", "label": "Следующий трек" },
-    "pad_6": { "cc": 107, "note": 41, "action": "media_prev", "label": "Предыдущий трек" },
-    "pad_7": { "cc": 108, "note": 42, "action": "smart_ducking", "label": "Приглушение" },
+    "pad_6": { "cc": 107, "note": 41, "action": "launch_telegram", "label": "Запуск Telegram" },
+    "pad_7": { "cc": 108, "note": 42, "action": "show_desktop", "label": "Рабочий стол (Win+D)" },
     "pad_8": { "cc": 109, "note": 43, "action": "snipping_tool", "label": "Скриншот" }
   }
 }
@@ -49,7 +48,7 @@
 | :--- | :--- | :--- | :--- |
 | `device_name` | `string` | `"Minilab"` | Подстрока для автопоиска MIDI-порта в системе Windows |
 | `show_osd` | `boolean` | `true` | Показывать ли плашку OSD над панелью задач |
-| `osd_duration_ms` | `integer` | `1500` | Время показа плашки OSD в миллисекундах |
+| `osd_duration_ms` | `integer` | `1000` | Время показа плашки OSD в миллисекундах |
 
 ---
 
@@ -79,13 +78,12 @@
 
 ### 3. Секция энкодеров (`encoders`)
 
-Описывает вращающиеся ручки-энкодеры (Encoders 1–3).
+Описывает вращающиеся ручки-энкодеры (Encoders 1–2).
 
 | Энкодер | CC | Команда (`action`) | Описание действия |
 | :--- | :--- | :--- | :--- |
-| `encoder_1` | `74` | `focused_app_volume` | Изменение громкости окна, находящегося в фокусе ввода |
-| `encoder_2` | `71` | `seek_media` | Перемотка воспроизведения (Вперед при `CC > 64`, Назад при `CC < 64`) |
-| `encoder_3` | `76` | `zoom_browser` | Масштабирование сайтов (`Ctrl+Plus` при `CC > 64`, `Ctrl+Minus` при `CC < 64`) |
+| `encoder_1` | `74` | `seek_media` | Перемотка воспроизведения (Вперед при `CC > 64`, Назад при `CC < 64`) |
+| `encoder_2` | `71` | `zoom_browser` | Масштабирование сайтов (`Ctrl+Plus` при `CC > 64`, `Ctrl+Minus` при `CC < 64`) |
 
 ---
 

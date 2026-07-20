@@ -110,9 +110,9 @@ void MidiController::ExecutePadAction(const PadConfig& pad) {
         std::lock_guard<std::mutex> lock(g_StateMutex);
         if (!g_SmartDuckingActive) {
             g_PreDuckingVolume = g_AppVolume.GetMasterVolume();
-            g_AppVolume.SetMasterVolume(0.15f);
+            g_AppVolume.SetMasterVolume(0.1f);
             g_SmartDuckingActive = true;
-            OSDWindow::Show(Utf8ToWstring("Приглушение"), -1, Utf8ToWstring("АКТИВИРОВАНО (15%)"));
+            OSDWindow::Show(Utf8ToWstring("Приглушение"), -1, Utf8ToWstring("АКТИВИРОВАНО (10%)"));
         } else {
             g_AppVolume.SetMasterVolume(g_PreDuckingVolume);
             g_SmartDuckingActive = false;

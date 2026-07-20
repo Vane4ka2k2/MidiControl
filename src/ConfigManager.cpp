@@ -227,6 +227,14 @@ void ConfigParser::LoadConfig(const std::string& filepath, AppConfig& config) {
                 f.type = faderVal.get("type").strVal;
             if (faderVal.has("label") && faderVal.get("label").type == JsonType::String)
                 f.label = faderVal.get("label").strVal;
+            if (faderVal.has("apps") && faderVal.get("apps").type == JsonType::Array) {
+                f.apps.clear();
+                for (const auto& appItem : faderVal.get("apps").arrVal) {
+                    if (appItem.type == JsonType::String) {
+                        f.apps.push_back(Utf8ToWstring(appItem.strVal));
+                    }
+                }
+            }
 
             config.faders[id] = f;
         }
@@ -288,7 +296,7 @@ void ConfigParser::LoadConfig(const std::string& filepath, AppConfig& config) {
 void ConfigParser::SetDefaultConfig(AppConfig& config) {
     config.deviceName = "Minilab";
     config.showOsd = true;
-    config.osdDurationMs = 1500;
+    config.osdDurationMs = 1000;
     config.faders.clear();
     config.encoders.clear();
     config.pads.clear();
@@ -300,17 +308,16 @@ void ConfigParser::SetDefaultConfig(AppConfig& config) {
     config.faders[1] = f1;
 
     // Энкодеры
-    EncoderConfig e1; e1.cc = 74; e1.action = "focused_app_volume"; e1.label = "Активное окно"; config.encoders[1] = e1;
-    EncoderConfig e2; e2.cc = 71; e2.action = "seek_media"; e2.label = "Перемотка трека"; config.encoders[2] = e2;
-    EncoderConfig e3; e3.cc = 76; e3.action = "zoom_browser"; e3.label = "Масштаб страницы"; config.encoders[3] = e3;
+    EncoderConfig e1; e1.cc = 74; e1.action = "seek_media"; e1.label = "Перемотка трека"; config.encoders[1] = e1;
+    EncoderConfig e2; e2.cc = 71; e2.action = "zoom_browser"; e2.label = "Масштаб страницы"; config.encoders[2] = e2;
 
     // Пэды
     PadConfig p1; p1.cc = 102; p1.note = 36; p1.action = "master_mute"; p1.label = "Отключить звук"; config.pads[1] = p1;
-    PadConfig p2; p2.cc = 103; p2.note = 37; p2.action = "show_desktop"; p2.label = "Рабочий стол (Win+D)"; config.pads[2] = p2;
-    PadConfig p3; p3.cc = 104; p3.note = 38; p3.action = "launch_telegram"; p3.label = "Запуск Telegram"; config.pads[3] = p3;
+    PadConfig p2; p2.cc = 103; p2.note = 37; p2.action = "smart_ducking"; p2.label = "Приглушение"; config.pads[2] = p2;
+    PadConfig p3; p3.cc = 104; p3.note = 38; p3.action = "media_prev"; p3.label = "Предыдущий трек"; config.pads[3] = p3;
     PadConfig p4; p4.cc = 105; p4.note = 39; p4.action = "media_play_pause"; p4.label = "Пауза / Воспроизведение"; config.pads[4] = p4;
     PadConfig p5; p5.cc = 106; p5.note = 40; p5.action = "media_next"; p5.label = "Следующий трек"; config.pads[5] = p5;
-    PadConfig p6; p6.cc = 107; p6.note = 41; p6.action = "media_prev"; p6.label = "Предыдущий трек"; config.pads[6] = p6;
-    PadConfig p7; p7.cc = 108; p7.note = 42; p7.action = "smart_ducking"; p7.label = "Приглушение"; config.pads[7] = p7;
+    PadConfig p6; p6.cc = 107; p6.note = 41; p6.action = "launch_telegram"; p6.label = "Запуск Telegram"; config.pads[6] = p6;
+    PadConfig p7; p7.cc = 108; p7.note = 42; p7.action = "show_desktop"; p7.label = "Рабочий стол (Win+D)"; config.pads[7] = p7;
     PadConfig p8; p8.cc = 109; p8.note = 43; p8.action = "snipping_tool"; p8.label = "Скриншот"; config.pads[8] = p8;
 }

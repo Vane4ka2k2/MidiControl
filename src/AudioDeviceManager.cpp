@@ -11,8 +11,8 @@ public:
     virtual HRESULT STDMETHODCALLTYPE SetDeviceFormat(PCWSTR, WAVEFORMATEX*, WAVEFORMATEX*) = 0;
     virtual HRESULT STDMETHODCALLTYPE GetProcessingPeriod(PCWSTR, INT, PULONG, PULONG) = 0;
     virtual HRESULT STDMETHODCALLTYPE SetProcessingPeriod(PCWSTR, PULONG) = 0;
-    virtual HRESULT STDMETHODCALLTYPE GetShareMode(PCWSTR, DeviceShareMode*) = 0;
-    virtual HRESULT STDMETHODCALLTYPE SetShareMode(PCWSTR, DeviceShareMode*) = 0;
+    virtual HRESULT STDMETHODCALLTYPE GetShareMode(PCWSTR, INT*) = 0;
+    virtual HRESULT STDMETHODCALLTYPE SetShareMode(PCWSTR, INT*) = 0;
     virtual HRESULT STDMETHODCALLTYPE GetPropertyValue(PCWSTR, const PROPERTYKEY&, PROPVARIANT*) = 0;
     virtual HRESULT STDMETHODCALLTYPE SetPropertyValue(PCWSTR, const PROPERTYKEY&, PROPVARIANT*) = 0;
     virtual HRESULT STDMETHODCALLTYPE SetDefaultEndpoint(PCWSTR wszDeviceId, ERole role) = 0;
@@ -82,7 +82,6 @@ std::wstring AudioDeviceManager::CycleOutputDevice() {
     auto devices = GetActiveOutputDevices();
     if (devices.empty()) return L"Нет активных аудиоустройств";
 
-    // Получаем текущее устройство по умолчанию
     std::wstring currentDefaultId = L"";
     IMMDevice* pDefaultDev = nullptr;
     if (SUCCEEDED(pEnumerator->GetDefaultAudioEndpoint(eRender, eMultimedia, &pDefaultDev)) && pDefaultDev) {
@@ -95,7 +94,6 @@ std::wstring AudioDeviceManager::CycleOutputDevice() {
         pDefaultDev->Release();
     }
 
-    // Находим индекс текущего устройства в списке
     int currentIndex = -1;
     for (size_t i = 0; i < devices.size(); ++i) {
         if (devices[i].id == currentDefaultId) {
@@ -107,7 +105,6 @@ std::wstring AudioDeviceManager::CycleOutputDevice() {
     int nextIndex = (currentIndex + 1) % static_cast<int>(devices.size());
     const auto& nextDevice = devices[nextIndex];
 
-    // Устанавливаем новое устройство по умолчанию в Windows
     IPolicyConfig* pPolicyConfig = nullptr;
     HRESULT hr = CoCreateInstance(CLSID_PolicyConfigClient, NULL, CLSCTX_INPROC_SERVER, IID_IPolicyConfig, (void**)&pPolicyConfig);
     if (SUCCEEDED(hr) && pPolicyConfig) {

@@ -8,10 +8,12 @@
 
 AppConfig MidiController::g_Config;
 AppVolumeManager MidiController::g_AppVolume;
-MicrophoneManager MidiController::g_MicManager;
+AudioDeviceManager MidiController::g_AudioDevManager;
 
 static bool g_SmartDuckingActive = false;
 static float g_PreDuckingVolume = 0.5f;
+static BYTE g_LastEncoder2Val = 64;
+static BYTE g_LastEncoder3Val = 64;
 
 bool MidiController::Initialize(const std::string& configPath) {
     ConfigParser::LoadConfig(configPath, g_Config);
@@ -71,14 +73,16 @@ void MidiController::Stop() {
 void MidiController::ExecutePadAction(const PadConfig& pad) {
     std::wstring label = Utf8ToWstring(pad.label);
 
-    if (pad.action == "toggle_mic_mute") {
-        bool isMuted = g_MicManager.ToggleMute();
-        std::wstring statusStr = isMuted ? Utf8ToWstring("ВЫКЛЮЧЕН") : Utf8ToWstring("ВКЛЮЧЕН");
-        OSDWindow::Show(Utf8ToWstring("Микрофон"), -1, statusStr);
-        std::wcout << L"[Пэд] Микрофон: " << statusStr << L"\n";
-    } else if (pad.action == "toggle_master_mute") {
-        MediaController::MasterMute();
-        OSDWindow::Show(Utf8ToWstring("Общий звук Mute"), -1, Utf8ToWstring("ПЕРЕКЛЮЧЕНО"));
+    if (pad.action == "cycle_audio_device") {
+        std::wstring newDevName = g_AudioDevManager.CycleOutputDevice();
+        OSDWindow::Show(Utf8ToWstring("Устройство вывода"), -1, newDevName);
+        std::wcout << L"[Пэд] Аудиовыход переключен на: " << newDevName << L"\n";
+    } else if (pad.action == "show_desktop") {
+        MediaController::ShowDesktop();
+        OSDWindow::Show(Utf8ToWstring("Рабочий стол"), -1, Utf8ToWstring("WIN + D"));
+    } else if (pad.action == "launch_telegram") {
+        MediaController::LaunchTelegram();
+        OSDWindow::Show(Utf8ToWstring("Запуск программы"), -1, Utf8ToWstring("TELEGRAM"));
     } else if (pad.action == "media_play_pause") {
         MediaController::PlayPause();
         OSDWindow::Show(Utf8ToWstring("Медиаплеер"), -1, Utf8ToWstring("PLAY / PAUSE"));
@@ -129,6 +133,28 @@ void MidiController::SetFocusedAppVolume(float scalar) {
     CloseHandle(hProcess);
 }
 
+void MidiController::HandleEncoder2(BYTE ccValue) {
+    if (ccValue > g_LastEncoder2Val) {
+        MediaController::SeekForward();
+        OSDWindow::Show(Utf8ToWstring("Перемотка"), -1, Utf8ToWstring("ВПЕРЕД ⏩"));
+    } else if (ccValue < g_LastEncoder2Val) {
+        MediaController::SeekBackward();
+        OSDWindow::Show(Utf8ToWstring("Перемотка"), -1, Utf8ToWstring("НАЗАД ⏪"));
+    }
+    g_LastEncoder2Val = ccValue;
+}
+
+void MidiController::HandleEncoder3(BYTE ccValue) {
+    if (ccValue > g_LastEncoder3Val) {
+        MediaController::ZoomIn();
+        OSDWindow::Show(Utf8ToWstring("Масштаб"), -1, Utf8ToWstring("УВЕЛИЧИТЬ 🔍+"));
+    } else if (ccValue < g_LastEncoder3Val) {
+        MediaController::ZoomOut();
+        OSDWindow::Show(Utf8ToWstring("Масштаб"), -1, Utf8ToWstring("УМЕНЬШИТЬ 🔍-"));
+    }
+    g_LastEncoder3Val = ccValue;
+}
+
 void CALLBACK MidiController::MidiInProc(HMIDIIN hMidiIn, UINT wMsg, DWORD_PTR dwInstance, DWORD_PTR dwParam1, DWORD_PTR dwParam2) {
     if (wMsg == MIM_DATA) {
         BYTE status = LOBYTE(LOWORD(dwParam1));
@@ -145,23 +171,29 @@ void CALLBACK MidiController::MidiInProc(HMIDIIN hMidiIn, UINT wMsg, DWORD_PTR d
             float scalar  = static_cast<float>(ccValue) / 127.0f;
             int percent   = static_cast<int>(scalar * 100.0f + 0.5f);
 
-            // Проверяем Энкодер 1 (CC 74) -> Громкость активного окна
+            // Encoder 1 (CC 74) -> Громкость активного окна
             if (ccNumber == 74) {
                 SetFocusedAppVolume(scalar);
                 return;
             }
+            // Encoder 2 (CC 71) -> Перемотка трека
+            else if (ccNumber == 71) {
+                HandleEncoder2(ccValue);
+                return;
+            }
+            // Encoder 3 (CC 76) -> Масштаб браузера
+            else if (ccNumber == 76) {
+                HandleEncoder3(ccValue);
+                return;
+            }
 
-            // Проверяем фейдеры (Faders 1..4)
+            // Fader 1 (CC 82 / 14) -> Общая мастер-громкость
             for (const auto& [id, fader] : g_Config.faders) {
                 if (ccNumber == fader.ccArturia || ccNumber == fader.ccDaw) {
                     std::wstring label = Utf8ToWstring(fader.label);
 
                     if (fader.type == "master_volume") {
                         g_AppVolume.SetMasterVolume(scalar);
-                        OSDWindow::Show(label, percent);
-                        std::cout << "[Громкость] " << fader.label << " -> " << percent << "%\n";
-                    } else if (fader.type == "app_volume") {
-                        g_AppVolume.SetAppGroupVolume(fader.apps, scalar);
                         OSDWindow::Show(label, percent);
                         std::cout << "[Громкость] " << fader.label << " -> " << percent << "%\n";
                     }
@@ -181,7 +213,7 @@ void CALLBACK MidiController::MidiInProc(HMIDIIN hMidiIn, UINT wMsg, DWORD_PTR d
                       << " | CC: " << static_cast<int>(ccNumber)
                       << " | Значение: " << static_cast<int>(ccValue) << "\n";
         }
-        // 2. Обработка Note On (0x90)
+        // 2. Обработка Note On (0x90) — Пэды
         else if (messageType == 0x90) {
             BYTE noteNumber = data1;
             BYTE velocity   = data2;

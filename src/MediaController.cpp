@@ -1,4 +1,5 @@
 #include "MediaController.h"
+#include <shellapi.h>
 
 void MediaController::PlayPause() {
     keybd_event(VK_MEDIA_PLAY_PAUSE, 0, 0, 0);
@@ -27,4 +28,39 @@ void MediaController::SnippingTool() {
     keybd_event('S', 0, KEYEVENTF_KEYUP, 0);
     keybd_event(VK_SHIFT, 0, KEYEVENTF_KEYUP, 0);
     keybd_event(VK_LWIN, 0, KEYEVENTF_KEYUP, 0);
+}
+
+void MediaController::ShowDesktop() {
+    keybd_event(VK_LWIN, 0, 0, 0);
+    keybd_event('D', 0, 0, 0);
+    keybd_event('D', 0, KEYEVENTF_KEYUP, 0);
+    keybd_event(VK_LWIN, 0, KEYEVENTF_KEYUP, 0);
+}
+
+void MediaController::LaunchTelegram() {
+    ShellExecuteW(NULL, L"open", L"tg://", NULL, NULL, SW_SHOWNORMAL);
+}
+
+void MediaController::SeekForward() {
+    keybd_event(VK_RIGHT, 0, 0, 0);
+    keybd_event(VK_RIGHT, 0, KEYEVENTF_KEYUP, 0);
+}
+
+void MediaController::SeekBackward() {
+    keybd_event(VK_LEFT, 0, 0, 0);
+    keybd_event(VK_LEFT, 0, KEYEVENTF_KEYUP, 0);
+}
+
+void MediaController::ZoomIn() {
+    keybd_event(VK_CONTROL, 0, 0, 0);
+    keybd_event(VK_OEM_PLUS, 0, 0, 0);
+    keybd_event(VK_OEM_PLUS, 0, KEYEVENTF_KEYUP, 0);
+    keybd_event(VK_CONTROL, 0, KEYEVENTF_KEYUP, 0);
+}
+
+void MediaController::ZoomOut() {
+    keybd_event(VK_CONTROL, 0, 0, 0);
+    keybd_event(VK_OEM_MINUS, 0, 0, 0);
+    keybd_event(VK_OEM_MINUS, 0, KEYEVENTF_KEYUP, 0);
+    keybd_event(VK_CONTROL, 0, KEYEVENTF_KEYUP, 0);
 }

@@ -15,7 +15,7 @@ void MappingWindow::Initialize(HINSTANCE hInstance) {
     int screenW = GetSystemMetrics(SM_CXSCREEN);
     int screenH = GetSystemMetrics(SM_CYSCREEN);
     int width = 570;
-    int height = 500;
+    int height = 480;
     int posX = (screenW - width) / 2;
     int posY = (screenH - height) / 2;
 
@@ -71,34 +71,33 @@ LRESULT CALLBACK MappingWindow::WndProc(HWND hwnd, UINT msg, WPARAM wParam, LPAR
         SelectObject(hdc, fontText);
         SetTextColor(hdc, RGB(220, 220, 225));
         TextOutW(hdc, 36, 88,  L"• Fader 1 (CC 82 / 14) — Общая мастер-громкость Windows", 54);
-        TextOutW(hdc, 36, 110, L"• Fader 2 (CC 83 / 15) — Громкость браузеров (Chrome, Edge...)", 61);
-        TextOutW(hdc, 36, 132, L"• Fader 3 (CC 85 / 30) — Громкость голосовой связи (Discord...)", 63);
-        TextOutW(hdc, 36, 154, L"• Fader 4 (CC 17 / 31) — Громкость музыкальных плееров", 53);
 
         // Секция 2: Пэды
         SelectObject(hdc, fontSection);
         SetTextColor(hdc, RGB(0, 210, 140));
-        TextOutW(hdc, 24, 190, L"ПЭДЫ (PADS 1–8):", 16);
+        TextOutW(hdc, 24, 124, L"ПЭДЫ (PADS 1–8):", 16);
 
         SelectObject(hdc, fontText);
         SetTextColor(hdc, RGB(220, 220, 225));
-        TextOutW(hdc, 36, 218, L"• Pad 1 (Нота 36 / CC 102) — Включение / выключение микрофона (Mute)", 68);
-        TextOutW(hdc, 36, 240, L"• Pad 2 (Нота 37 / CC 103) — Заглушить общий звук (Master Mute)", 64);
-        TextOutW(hdc, 36, 262, L"• Pad 3 (Нота 38 / CC 104) — Воспроизведение / Пауза", 51);
-        TextOutW(hdc, 36, 284, L"• Pad 4 (Нота 39 / CC 105) — Следующий трек", 43);
-        TextOutW(hdc, 36, 306, L"• Pad 5 (Нота 40 / CC 106) — Предыдущий трек", 44);
-        TextOutW(hdc, 36, 328, L"• Pad 6 (Нота 41 / CC 107) — Режим приглушения (Smart Ducking 15%)", 66);
-        TextOutW(hdc, 36, 350, L"• Pad 7 (Нота 42 / CC 108) — Скриншот области экрана (Win+Shift+S)", 66);
-        TextOutW(hdc, 36, 372, L"• Pad 8 (Нота 43 / CC 109) — Альтернативное выключение микрофона", 65);
+        TextOutW(hdc, 36, 152, L"• Pad 1 (Нота 36 / CC 102) — Переключение вывода (Наушники ↔ Динамики)", 70);
+        TextOutW(hdc, 36, 174, L"• Pad 2 (Нота 37 / CC 103) — Рабочий стол / Свернуть окна (Win + D)", 66);
+        TextOutW(hdc, 36, 196, L"• Pad 3 (Нота 38 / CC 104) — Быстрый запуск Telegram", 52);
+        TextOutW(hdc, 36, 218, L"• Pad 4 (Нота 39 / CC 105) — Воспроизведение / Пауза (Play/Pause)", 64);
+        TextOutW(hdc, 36, 240, L"• Pad 5 (Нота 40 / CC 106) — Следующий трек", 43);
+        TextOutW(hdc, 36, 262, L"• Pad 6 (Нота 41 / CC 107) — Предыдущий трек", 44);
+        TextOutW(hdc, 36, 284, L"• Pad 7 (Нота 42 / CC 108) — Приглушение звука (Smart Ducking 15%)", 66);
+        TextOutW(hdc, 36, 306, L"• Pad 8 (Нота 43 / CC 109) — Скриншот области экрана (Win+Shift+S)", 66);
 
         // Секция 3: Энкодеры
         SelectObject(hdc, fontSection);
         SetTextColor(hdc, RGB(180, 140, 255));
-        TextOutW(hdc, 24, 404, L"ЭНКОДЕРЫ (ENCODERS):", 19);
+        TextOutW(hdc, 24, 342, L"ЭНКОДЕРЫ (ENCODERS):", 19);
 
         SelectObject(hdc, fontText);
         SetTextColor(hdc, RGB(220, 220, 225));
-        TextOutW(hdc, 36, 428, L"• Encoder 1 (CC 74) — Громкость активного фокусного окна", 56);
+        TextOutW(hdc, 36, 370, L"• Encoder 1 (CC 74) — Громкость активного фокусного окна", 56);
+        TextOutW(hdc, 36, 392, L"• Encoder 2 (CC 71) — Перемотка видео / трека (Вперед / Назад)", 61);
+        TextOutW(hdc, 36, 414, L"• Encoder 3 (CC 76) — Масштабирование браузера (Zoom In / Out)", 62);
 
         DeleteObject(fontSection);
         DeleteObject(fontText);

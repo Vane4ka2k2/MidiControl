@@ -4,7 +4,7 @@
 #include <string>
 #include "ConfigManager.h"
 #include "AppVolumeManager.h"
-#include "MicrophoneManager.h"
+#include "AudioDeviceManager.h"
 
 class MidiController {
 private:
@@ -14,7 +14,7 @@ private:
 public:
     static AppConfig g_Config;
     static AppVolumeManager g_AppVolume;
-    static MicrophoneManager g_MicManager;
+    static AudioDeviceManager g_AudioDevManager;
 
     bool Initialize(const std::string& configPath);
     void Start();
@@ -24,4 +24,6 @@ private:
     static void CALLBACK MidiInProc(HMIDIIN hMidiIn, UINT wMsg, DWORD_PTR dwInstance, DWORD_PTR dwParam1, DWORD_PTR dwParam2);
     static void ExecutePadAction(const PadConfig& pad);
     static void SetFocusedAppVolume(float scalar);
+    static void HandleEncoder2(BYTE ccValue);
+    static void HandleEncoder3(BYTE ccValue);
 };

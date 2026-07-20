@@ -8,44 +8,21 @@
       "cc_daw": 14,
       "type": "master_volume",
       "label": "Общая громкость"
-    },
-    "fader_2": {
-      "cc_arturia": 83,
-      "cc_daw": 15,
-      "type": "app_volume",
-      "label": "Браузер",
-      "apps": ["chrome.exe", "msedge.exe", "firefox.exe", "browser.exe", "opera.exe"]
-    },
-    "fader_3": {
-      "cc_arturia": 85,
-      "cc_daw": 30,
-      "type": "app_volume",
-      "label": "Голос / Дискорд",
-      "apps": ["Discord.exe", "Telegram.exe", "Teams.exe", "skype.exe"]
-    },
-    "fader_4": {
-      "cc_arturia": 17,
-      "cc_daw": 31,
-      "type": "app_volume",
-      "label": "Медиа / Музыка",
-      "apps": ["Spotify.exe", "YandexMusic.exe", "vlc.exe", "foobar2000.exe", "wmplayer.exe"]
     }
   },
   "encoders": {
-    "encoder_1": {
-      "cc": 74,
-      "type": "focused_app_volume",
-      "label": "Активное окно"
-    }
+    "encoder_1": { "cc": 74, "action": "focused_app_volume", "label": "Активное окно" },
+    "encoder_2": { "cc": 71, "action": "seek_media", "label": "Перемотка трека" },
+    "encoder_3": { "cc": 76, "action": "zoom_browser", "label": "Масштаб страницы" }
   },
   "pads": {
-    "pad_1": { "cc": 102, "note": 36, "action": "toggle_mic_mute", "label": "Микрофон" },
-    "pad_2": { "cc": 103, "note": 37, "action": "toggle_master_mute", "label": "Заглушить звук" },
-    "pad_3": { "cc": 104, "note": 38, "action": "media_play_pause", "label": "Пауза / Воспроизведение" },
-    "pad_4": { "cc": 105, "note": 39, "action": "media_next", "label": "Следующий трек" },
-    "pad_5": { "cc": 106, "note": 40, "action": "media_prev", "label": "Предыдущий трек" },
-    "pad_6": { "cc": 107, "note": 41, "action": "smart_ducking", "label": "Приглушение" },
-    "pad_7": { "cc": 108, "note": 42, "action": "snipping_tool", "label": "Скриншот" },
-    "pad_8": { "cc": 109, "note": 43, "action": "toggle_mic_mute", "label": "Микрофон (Alt)" }
+    "pad_1": { "cc": 102, "note": 36, "action": "cycle_audio_device", "label": "Устройство вывода" },
+    "pad_2": { "cc": 103, "note": 37, "action": "show_desktop", "label": "Рабочий стол (Win+D)" },
+    "pad_3": { "cc": 104, "note": 38, "action": "launch_telegram", "label": "Запуск Telegram" },
+    "pad_4": { "cc": 105, "note": 39, "action": "media_play_pause", "label": "Пауза / Воспроизведение" },
+    "pad_5": { "cc": 106, "note": 40, "action": "media_next", "label": "Следующий трек" },
+    "pad_6": { "cc": 107, "note": 41, "action": "media_prev", "label": "Предыдущий трек" },
+    "pad_7": { "cc": 108, "note": 42, "action": "smart_ducking", "label": "Приглушение" },
+    "pad_8": { "cc": 109, "note": 43, "action": "snipping_tool", "label": "Скриншот" }
   }
 }

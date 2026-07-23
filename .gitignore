@@ -1,26 +1,92 @@
-# Build directories
-build/
-bin/
-out/
-docs/html/
-docs/latex/
+﻿# ==========================================
+# C++ / CMake / Qt / Windows / IDE .gitignore
+# ==========================================
 
-# MSVC / Visual Studio generated files
-*.user
-*.aps
-*.VC.db
-*.opendb
-*.sdf
+# Prerequisites
+*.d
+
+# Compiled Object files
+*.slo
+*.lo
+*.o
+*.obj
+
+# Precompiled Headers
+*.gch
+*.pch
+
+# Compiled Dynamic libraries
+*.so
+*.dylib
+*.dll
+
+# Fortran modules
+*.mod
+*.smod
+
+# Compiled Static libraries
+*.lai
+*.la
+*.a
+*.lib
+
+# Executables
+*.exe
+*.out
+*.app
+
+# CMake build directories & files
+build/
+build-*/
+out/
+bin/
+obj/
+CMakeCache.txt
+CMakeFiles/
+cmake_install.cmake
+install_manifest.txt
+compile_commands.json
+CTestTestfile.cmake
+_deps/
+*.cmake.user
+CMakePresets.json.user
+
+# MSVC / Visual Studio
+.vs/
+*.vcxproj.user
 *.suo
 *.user
-*.idb
-*.pdb
-*.ilk
-*.exe
-*.obj
-.vs/
+*.userosv
+*.sln.docstates
+*.userprefs
+*.ncb
+*.suo
+*.sln.docstates
+*.sdf
+*.opensdf
+*.unsuccessfulbuild
+*.ipch
 
-# System / OS
+# Qt / Qt Creator
+.qtcreator/
+*.pro.user
+*.pro.user.*
+.qmake.stash
+ui_*.h
+qrc_*.cpp
+moc_*.cpp
+
+# VS Code / JetBrains IDEs
+.vscode/
+.idea/
+.clion/
+
+# OS generated files
 Thumbs.db
-Desktop.ini
+[Dd]esktop.ini
 .DS_Store
+
+# Temporary / Log files
+*.log
+*.tmp
+*.bak
